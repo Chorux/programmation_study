@@ -26,7 +26,7 @@ Acredito que a colaboração e a troca de conhecimento são essenciais para o de
 
 * **LinkedIn:** *[Vinicius Pordeus](https://www.linkedin.com/in/vin%C3%ADcius-wesley-031106341/)*
 * **Email:** *Viniciuswesleyp@gmail.com*
-* **Primeiro Projeto:** *https://chorux.github.io/programmation_study/*!
+* **Primeiro Projeto:** *https://chorux.github.io/programmation_study/*
 
 Obrigado por visitar meu perfil! Vamos codar! 🚀
 
