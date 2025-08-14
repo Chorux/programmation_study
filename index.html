@@ -15,7 +15,7 @@
             background-color: #4F46E5;
             border-color: #4F46E5;
         }
-        .custom-checkbox:checked + span {
+        .custom-checkbox:checked + a {
             text-decoration: line-through;
             color: #6B7280;
         }
@@ -48,7 +48,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .message-content pre {
+        .message-content pre, .modal-content pre {
             background-color: #1E293B;
             color: #E2E8F0;
             padding: 1rem;
@@ -58,20 +58,20 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-        .message-content code {
+        .message-content code, .modal-content code {
             font-family: 'Courier New', Courier, monospace;
         }
-        .message-content p {
-            margin-bottom: 0.5rem;
+        .message-content p, .modal-content p {
+            margin-bottom: 1rem;
         }
-        .message-content h1, .message-content h2, .message-content h3 {
+        .message-content h1, .message-content h1, .modal-content h2, .modal-content h3 {
             font-weight: 600;
             margin-bottom: 0.5rem;
             margin-top: 1rem;
         }
-        .message-content ul, .message-content ol {
+        .message-content ul, .message-content ol, .modal-content ul, .modal-content ol {
             margin-left: 1.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
             list-style: revert;
         }
         .tab-button {
@@ -81,6 +81,23 @@
             background-color: #4F46E5;
             color: white;
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        .info-icon {
+            cursor: pointer;
+            color: #6b7280;
+            font-weight: bold;
+            border: 1px solid #d1d5db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-style: normal;
+            margin-left: 8px;
+        }
+        .info-icon:hover {
+            background-color: #e5e7eb;
         }
     </style>
 </head>
@@ -126,7 +143,7 @@
         </footer>
 
         <!-- AI Assistant Panel -->
-        <div id="ai-assistant" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-lg transform translate-x-full z-50 flex flex-col">
+        <div id="ai-assistant" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-lg transform translate-x-full z-[60] flex flex-col">
             <div class="p-4 border-b flex justify-between items-center bg-slate-50">
                 <h2 id="ai-assistant-title" class="text-xl font-semibold text-slate-800"></h2>
                 <div class="flex items-center gap-2">
@@ -142,8 +159,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- API Key Modal -->
         <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[100]">
             <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4">
                 <h3 id="modal-title" class="text-lg font-bold mb-4"></h3>
@@ -151,98 +166,111 @@
                 <ol id="modal-steps" class="text-sm text-slate-600 mb-4 list-decimal list-inside space-y-1"></ol>
                 <input id="api-key-input" type="password" class="w-full p-2 border border-slate-300 rounded-md mb-4">
                 <div class="flex justify-end gap-2">
-                    <button id="cancel-api-key" class="px-4 py-2 bg-slate-200 rounded-md hover:bg-slate-300"></button>
+                    <button id="cancel-api-key" class="px-4 py-2 bg-slate-200 rounded-md hover:bg-slate-300">Cancelar</button>
                     <button id="save-api-key" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"></button>
                 </div>
             </div>
         </div>
-
-        <!-- Floating Toggle Button -->
         <button id="toggle-ai" class="fixed bottom-8 right-8 bg-indigo-600 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-3xl z-40 hover:bg-indigo-700 transition">🤖</button>
+
+        <!-- Content Info Modal -->
+        <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[100]">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl mx-4 h-[90vh] flex flex-col">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 id="info-modal-title" class="text-2xl font-bold"></h3>
+                    <button id="close-info-modal" class="p-2 rounded-full hover:bg-slate-200 text-2xl leading-none">&times;</button>
+                </div>
+                <div id="info-modal-content" class="mt-4 overflow-y-auto flex-grow modal-content"></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const contentData = {
             general: {
                 pt: [
-                    { module: "Módulo 1: Fundamentos Essenciais", topics: [{ name: "Lógica de Programação e Algoritmos", link: "https://www.cursoemvideo.com/course/curso-de-algoritmos/" }, { name: "Tipos de Dados e Variáveis", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operadores", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Estruturas Condicionais", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Estruturas de Repetição", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
-                    { module: "Módulo 2: Linguagem de Programação (Base)", topics: ["Sintaxe e Ambiente", "Funções e Escopo", "Estruturas de Dados Nativas", "Manipulação de Strings e Números", "Tratamento de Erros"] },
-                    { module: "Módulo 3: Estruturas de Dados", topics: ["Arrays e Matrizes", "Pilhas e Filas", "Listas Encadeadas", "Árvores", "Grafos", "Tabelas Hash"] },
-                    { module: "Módulo 4: Algoritmos Avançados", topics: ["Análise de Complexidade (Big O)", "Busca e Ordenação", "Recursividade", "Programação Dinâmica"] },
-                    { module: "Módulo 5: Paradigmas de Programação", topics: ["Programação Orientada a Objetos", "Programação Funcional", "Padrões de Projeto (Design Patterns)"] },
-                    { module: "Módulo 6: Banco de Dados", topics: ["Banco de Dados Relacionais (SQL)", "Banco de Dados NoSQL", "Modelagem de Dados", "ORM (Mapeamento Objeto-Relacional)"] },
-                    { module: "Módulo 7: Ferramentas e Boas Práticas", topics: ["Controle de Versão (Git e GitHub)", "Linha de Comando", "Testes de Software", "Princípios de Design (SOLID, DRY)", "APIs REST"] },
-                    { module: "Módulo 8: Tópicos Avançados", topics: ["Concorrência e Paralelismo", "Arquitetura de Software", "Segurança", "Cloud Computing", "Containers (Docker)"] },
+                    { module: "Fase 1: O Pensamento Computacional", topics: [{ id: "algoritmo", name: "O que é um Algoritmo?", link: "https://www.alura.com.br/artigos/o-que-e-um-algoritmo" }, { id: "logica", name: "Lógica de Programação", link: "https://www.devmedia.com.br/logica-de-programacao-o-primeiro-passo/23345" }, { id: "pseudo", name: "Pseudocódigo e Fluxogramas", link: "https://www.geeksforgeeks.org/how-to-write-a-pseudo-code/" }, { id: "problemas", name: "Resolução de Problemas", link: "https://www.khanacademy.org/computing/computer-programming/programming/intro-to-programming/a/problem-solving-steps" }] },
+                    { module: "Fase 2: As Ferramentas Fundamentais", topics: [{ id: "variaveis", name: "Variáveis e Tipos de Dados", link: "https://www.freecodecamp.org/news/data-types-in-computer-science/" }, { id: "operadores", name: "Operadores (Matemáticos, Lógicos)", link: "https://www.tutorialspoint.com/computer_programming/computer_programming_operators.htm" }, { id: "controle", name: "Estruturas de Controle (Condicionais e Laços)", link: "https://www.freecodecamp.org/news/control-flow-in-programming/" }, { id: "funcoes", name: "Funções e Procedimentos", link: "https://www.freecodecamp.org/news/what-is-a-function-javascript-function-examples/" }, { id: "estruturas", name: "Estruturas de Dados Básicas (Arrays, Listas)", link: "https://www.freecodecamp.org/news/data-structures-101-arrays-and-linked-lists-3f6224c0886b/" }] },
+                    { module: "Fase 3: Organizando o Código", topics: [{ id: "paradigmas", name: "Paradigmas de Programação (POO, Funcional)", link: "https://www.freecodecamp.org/news/an-introduction-to-programming-paradigms/" }, { id: "modularizacao", name: "Modularização e Reutilização de Código", link: "https://www.baeldung.com/cs/modular-programming" }, { id: "erros", name: "Tratamento de Erros e Exceções", link: "https://www.freecodecamp.org/news/error-handling-in-programming/" }, { id: "abstracao", name: "Abstração e Encapsulamento", link: "https://www.freecodecamp.org/news/what-is-abstraction-in-oop-java-c-example/" }] },
+                    { module: "Fase 4: Interagindo com o Mundo", topics: [{ id: "api", name: "O que é uma API?", link: "https://www.redhat.com/pt-br/topics/api/what-are-application-programming-interfaces" }, { id: "db", name: "Fundamentos de Banco de Dados (SQL vs NoSQL)", link: "https://www.mongodb.com/compare/sql-vs-nosql" }, { id: "terminal", name: "Linha de Comando (Terminal)", link: "https://www.freecodecamp.org/news/command-line-for-beginners/" }, { id: "http", name: "Protocolo HTTP e a Web", link: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview" }] },
+                    { module: "Fase 5: O Ciclo de Vida do Software", topics: [{ id: "git", name: "Controle de Versão com Git", link: "https://git-scm.com/book/pt-br/v2" }, { id: "testes", name: "A Importância dos Testes", link: "https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing" }, { id: "debug", name: "Depuração (Debugging)", link: "https://www.freecodecamp.org/news/what-is-debugging-how-to-debug-code/" }, { id: "boaspraticas", name: "Boas Práticas (SOLID, DRY, KISS)", link: "https://www.digitalocean.com/community/conceptual_articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design" }] },
                 ],
                 en: [
-                    { module: "Module 1: Essential Fundamentals", topics: [{ name: "Programming Logic and Algorithms", link: "https://www.geeksforgeeks.org/introduction-to-algorithms/" }, { name: "Data Types and Variables", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operators", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Conditional Statements", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Looping Structures", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
-                    { module: "Module 2: Programming Language (Base)", topics: ["Syntax and Environment", "Functions and Scope", "Native Data Structures", "String and Number Manipulation", "Error Handling"] },
-                    { module: "Module 3: Data Structures", topics: ["Arrays and Matrices", "Stacks and Queues", "Linked Lists", "Trees", "Graphs", "Hash Tables"] },
-                    { module: "Module 4: Advanced Algorithms", topics: ["Complexity Analysis (Big O)", "Searching and Sorting", "Recursion", "Dynamic Programming"] },
-                    { module: "Module 5: Programming Paradigms", topics: ["Object-Oriented Programming", "Functional Programming", "Design Patterns"] },
-                    { module: "Module 6: Databases", topics: ["Relational Databases (SQL)", "NoSQL Databases", "Data Modeling", "ORM (Object-Relational Mapping)"] },
-                    { module: "Module 7: Tools and Best Practices", topics: ["Version Control (Git and GitHub)", "Command Line", "Software Testing", "Design Principles (SOLID, DRY)", "REST APIs"] },
-                    { module: "Module 8: Advanced Topics", topics: ["Concurrency and Parallelism", "Software Architecture", "Security", "Cloud Computing", "Containers (Docker)"] },
+                    { module: "Phase 1: Computational Thinking", topics: [{ id: "algoritmo", name: "What is an Algorithm?", link: "https://www.geeksforgeeks.org/introduction-to-algorithms/" }, { id: "logica", name: "Programming Logic", link: "https://www.freecodecamp.org/news/programming-logic-how-to-start-thinking-like-a-coder/" }, { id: "pseudo", name: "Pseudocode and Flowcharts", link: "https://www.geeksforgeeks.org/how-to-write-a-pseudo-code/" }, { id: "problemas", name: "Problem Solving", link: "https://www.khanacademy.org/computing/computer-programming/programming/intro-to-programming/a/problem-solving-steps" }] },
+                    { module: "Phase 2: The Fundamental Tools", topics: [{ id: "variaveis", name: "Variables and Data Types", link: "https://www.freecodecamp.org/news/data-types-in-computer-science/" }, { id: "operadores", name: "Operators (Mathematical, Logical)", link: "https://www.tutorialspoint.com/computer_programming/computer_programming_operators.htm" }, { id: "controle", name: "Control Structures (Conditionals and Loops)", link: "https://www.freecodecamp.org/news/control-flow-in-programming/" }, { id: "funcoes", name: "Functions and Procedures", link: "https://www.freecodecamp.org/news/what-is-a-function-javascript-function-examples/" }, { id: "estruturas", name: "Basic Data Structures (Arrays, Lists)", link: "https://www.freecodecamp.org/news/data-structures-101-arrays-and-linked-lists-3f6224c0886b/" }] },
+                    { module: "Phase 3: Organizing Code", topics: [{ id: "paradigmas", name: "Programming Paradigms (OOP, Functional)", link: "https://www.freecodecamp.org/news/an-introduction-to-programming-paradigms/" }, { id: "modularizacao", name: "Modularization and Code Reuse", link: "https://www.baeldung.com/cs/modular-programming" }, { id: "erros", name: "Error and Exception Handling", link: "https://www.freecodecamp.org/news/error-handling-in-programming/" }, { id: "abstracao", name: "Abstraction and Encapsulation", link: "https://www.freecodecamp.org/news/what-is-abstraction-in-oop-java-c-example/" }] },
+                    { module: "Phase 4: Interacting with the World", topics: [{ id: "api", name: "What is an API?", link: "https://www.redhat.com/en/topics/api/what-are-application-programming-interfaces" }, { id: "db", name: "Database Fundamentals (SQL vs NoSQL)", link: "https://www.mongodb.com/compare/sql-vs-nosql" }, { id: "terminal", name: "Command Line (Terminal)", link: "https://www.freecodecamp.org/news/command-line-for-beginners/" }, { id: "http", name: "HTTP Protocol and the Web", link: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview" }] },
+                    { module: "Phase 5: The Software Lifecycle", topics: [{ id: "git", name: "Version Control with Git", link: "https://git-scm.com/book/en/v2" }, { id: "testes", name: "The Importance of Testing", link: "https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing" }, { id: "debug", name: "Debugging", link: "https://www.freecodecamp.org/news/what-is-debugging-how-to-debug-code/" }, { id: "boaspraticas", name: "Best Practices (SOLID, DRY, KISS)", link: "https://www.digitalocean.com/community/conceptual_articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design" }] },
                 ]
             },
             js: {
                 pt: [
-                    { module: "Módulo 1: JavaScript - A Base", topics: ["Sintaxe e Ambiente (Node.js, Navegador)", { name: "Funções e Escopo", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Functions" }, { name: "Arrays e Objetos", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "Manipulação do DOM", { name: "Tratamento de Erros", link: "https://www.w3schools.com/js/js_errors.asp" }] },
-                    { module: "Módulo 2: JavaScript Avançado", topics: [{ name: "Programação Assíncrona (Promises, async/await)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Módulos (import/export)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Modules" }, "POO (Prototypes, Classes)", "Programação Funcional (map, filter, reduce)", "Event Loop"] },
-                    { module: "Módulo 3: Ecossistema JS", topics: [{ name: "Gerenciador de Pacotes (NPM/Yarn)", link: "https://docs.npmjs.com/about-npm" }, { name: "Frameworks (React, Vue ou Angular)", link: "https://react.dev/" }, "Bundlers (Webpack, Vite)", { name: "Testes (Jest, Testing Library)", link: "https://jestjs.io/" }, "TypeScript", { name: "Node.js e Express.js", link: "https://expressjs.com/pt-br/" }] },
+                    { module: "Nível 1: JavaScript Iniciante", topics: [{ name: "Configurando o Ambiente (Node.js, VS Code)", link: "https://code.visualstudio.com/docs/nodejs/nodejs-tutorial" }, { name: "Variáveis, Tipos e Operadores", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Funções e Controle de Fluxo", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Functions" }, { name: "Manipulação do DOM e Eventos", link: "https://developer.mozilla.org/pt-BR/docs/Learn/JavaScript/Building_blocks/Events" }] },
+                    { module: "Nível 2: JavaScript Intermediário", topics: [{ name: "Arrays e Objetos (Métodos Avançados)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array" }, { name: "POO (Prototypes, Classes)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Working_with_Objects" }, { name: "Promises e Async/Await", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Consumindo APIs (Fetch)", link: "https://developer.mozilla.org/pt-BR/docs/Web/API/Fetch_API/Using_Fetch" }] },
+                    { module: "Nível 3: JavaScript Avançado", topics: [{ name: "Módulos (import/export)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Modules" }, { name: "Programação Funcional (Composição, Currying)", link: "https://www.freecodecamp.org/news/functional-programming-in-javascript/" }, { name: "Estruturas de Dados em JS", link: "https://www.freecodecamp.org/news/data-structures-in-javascript-with-examples/" }, { name: "Event Loop e Concorrência", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/EventLoop" }] },
+                    { module: "Nível 4: Ecossistema e Especialização", topics: [{ name: "TypeScript", link: "https://www.typescriptlang.org/docs/" }, { name: "Backend com Node.js e Express", link: "https://expressjs.com/pt-br/starter/hello-world.html" }, { name: "Frontend com React (ou Vue/Angular)", link: "https://react.dev/learn" }, { name: "Testes (Jest, Cypress)", link: "https://jestjs.io/pt-BR/docs/getting-started" }, { name: "WebSockets e Performance", link: "https://developer.mozilla.org/pt-BR/docs/Web/API/WebSockets_API" }] }
                 ],
                 en: [
-                    { module: "Module 1: JavaScript - The Base", topics: ["Syntax and Environment (Node.js, Browser)", { name: "Functions and Scope", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" }, { name: "Arrays and Objects", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "DOM Manipulation", { name: "Error Handling", link: "https://www.w3schools.com/js/js_errors.asp" }] },
-                    { module: "Module 2: Advanced JavaScript", topics: [{ name: "Asynchronous Programming (Promises, async/await)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Modules (import/export)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" }, "OOP (Prototypes, Classes)", "Functional Programming (map, filter, reduce)", "Event Loop"] },
-                    { module: "Module 3: JS Ecosystem", topics: [{ name: "Package Managers (NPM/Yarn)", link: "https://docs.npmjs.com/about-npm" }, { name: "Frameworks (React, Vue, or Angular)", link: "https://react.dev/" }, "Bundlers (Webpack, Vite)", { name: "Testing (Jest, Testing Library)", link: "https://jestjs.io/" }, "TypeScript", { name: "Node.js and Express.js", link: "https://expressjs.com/" }] },
+                    { module: "Level 1: Beginner JavaScript", topics: [{ name: "Setting up the Environment (Node.js, VS Code)", link: "https://code.visualstudio.com/docs/nodejs/nodejs-tutorial" }, { name: "Variables, Types, and Operators", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Functions and Control Flow", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" }, { name: "DOM Manipulation and Events", link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events" }] },
+                    { module: "Level 2: Intermediate JavaScript", topics: [{ name: "Arrays and Objects (Advanced Methods)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }, { name: "OOP (Prototypes, Classes)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects" }, { name: "Promises and Async/Await", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Consuming APIs (Fetch)", link: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" }] },
+                    { module: "Level 3: Advanced JavaScript", topics: [{ name: "Modules (import/export)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" }, { name: "Functional Programming (Composition, Currying)", link: "https://www.freecodecamp.org/news/functional-programming-in-javascript/" }, { name: "Data Structures in JS", link: "https://www.freecodecamp.org/news/data-structures-in-javascript-with-examples/" }, { name: "Event Loop and Concurrency", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/EventLoop" }] },
+                    { module: "Level 4: Ecosystem and Specialization", topics: [{ name: "TypeScript", link: "https://www.typescriptlang.org/docs/" }, { name: "Backend with Node.js and Express", link: "https://expressjs.com/en/starter/hello-world.html" }, { name: "Frontend with React (or Vue/Angular)", link: "https://react.dev/learn" }, { name: "Testing (Jest, Cypress)", link: "https://jestjs.io/docs/getting-started" }, { name: "WebSockets and Performance", link: "https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API" }] }
                 ]
             },
             python: {
                 pt: [
-                    { module: "Módulo 1: Python - A Base", topics: ["Sintaxe e Ambiente (Python 3, venv)", { name: "Funções e Escopo", link: "https://docs.python.org/pt-br/3/tutorial/controlflow.html#defining-functions" }, { name: "Estruturas de Dados (list, tuple, dict, set)", link: "https://docs.python.org/pt-br/3/tutorial/datastructures.html" }, "Manipulação de Arquivos", { name: "Tratamento de Erros", link: "https://docs.python.org/pt-br/3/tutorial/errors.html" }] },
-                    { module: "Módulo 2: Python Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://docs.python.org/pt-br/3/tutorial/classes.html" }, { name: "Programação Funcional (List Comprehensions, Lambda)", link: "https://docs.python.org/pt-br/3/howto/functional.html" }, "Módulos e Pacotes", "Decorators", "Generators"] },
-                    { module: "Módulo 3: Ecossistema Python", topics: [{ name: "Gerenciador de Pacotes (Pip)", link: "https://pip.pypa.io/en/stable/" }, { name: "Frameworks Web (Django ou Flask)", link: "https://www.djangoproject.com/" }, "Análise de Dados (Pandas, NumPy)", { name: "Testes (Pytest, Unittest)", link: "https://docs.pytest.org/en/stable/" }, "APIs com FastAPI", "Automação de Tarefas"] },
+                    { module: "Nível 1: Python Iniciante", topics: [{ name: "Instalando Python e VS Code", link: "https://code.visualstudio.com/docs/python/python-tutorial" }, { name: "Variáveis, Tipos e Operadores", link: "https://docs.python.org/pt-br/3/library/stdtypes.html" }, { name: "Estruturas de Dados (Listas, Tuplas, Dicionários)", link: "https://docs.python.org/pt-br/3/tutorial/datastructures.html" }, { name: "Funções e Controle de Fluxo", link: "https://docs.python.org/pt-br/3/tutorial/controlflow.html#defining-functions" }] },
+                    { module: "Nível 2: Python Intermediário", topics: [{ name: "Programação Orientada a Objetos (POO)", link: "https://docs.python.org/pt-br/3/tutorial/classes.html" }, { name: "Manipulação de Arquivos", link: "https://docs.python.org/pt-br/3/tutorial/inputoutput.html#reading-and-writing-files" }, { name: "Módulos e Pacotes", link: "https://docs.python.org/pt-br/3/tutorial/modules.html" }, { name: "Ambientes Virtuais (venv) e Pip", link: "https://docs.python.org/pt-br/3/library/venv.html" }] },
+                    { module: "Nível 3: Python Avançado", topics: [{ name: "List Comprehensions e Generators", link: "https://docs.python.org/pt-br/3/howto/functional.html" }, { name: "Decorators", link: "https://realpython.com/primer-on-python-decorators/" }, { name: "Programação Assíncrona (asyncio)", link: "https://docs.python.org/pt-br/3/library/asyncio.html" }, { name: "Testes com Pytest", link: "https://docs.pytest.org/en/stable/getting-started.html" }] },
+                    { module: "Nível 4: Ecossistema e Especialização", topics: [{ name: "Web com Django ou Flask", link: "https://www.djangoproject.com/start/" }, { name: "APIs com FastAPI", link: "https://fastapi.tiangolo.com/" }, { name: "Ciência de Dados (Pandas, NumPy, Scikit-learn)", link: "https://pandas.pydata.org/docs/getting_started/index.html" }, { name: "Machine Learning (TensorFlow, PyTorch)", link: "https://www.tensorflow.org/tutorials" }, { name: "Automação e Scripting", link: "https://automatetheboringstuff.com/" }] }
                 ],
                 en: [
-                    { module: "Module 1: Python - The Base", topics: ["Syntax and Environment (Python 3, venv)", { name: "Functions and Scope", link: "https://docs.python.org/3/tutorial/controlflow.html#defining-functions" }, { name: "Data Structures (list, tuple, dict, set)", link: "https://docs.python.org/3/tutorial/datastructures.html" }, "File Handling", { name: "Error Handling", link: "https://docs.python.org/3/tutorial/errors.html" }] },
-                    { module: "Module 2: Advanced Python", topics: [{ name: "Object-Oriented Programming", link: "https://docs.python.org/3/tutorial/classes.html" }, { name: "Functional Programming (List Comprehensions, Lambda)", link: "https://docs.python.org/3/howto/functional.html" }, "Modules and Packages", "Decorators", "Generators"] },
-                    { module: "Module 3: Python Ecosystem", topics: [{ name: "Package Manager (Pip)", link: "https://pip.pypa.io/en/stable/" }, { name: "Web Frameworks (Django or Flask)", link: "https://www.djangoproject.com/" }, "Data Analysis (Pandas, NumPy)", { name: "Testing (Pytest, Unittest)", link: "https://docs.pytest.org/en/stable/" }, "APIs with FastAPI", "Task Automation"] },
+                    { module: "Level 1: Beginner Python", topics: [{ name: "Installing Python and VS Code", link: "https://code.visualstudio.com/docs/python/python-tutorial" }, { name: "Variables, Types, and Operators", link: "https://docs.python.org/3/library/stdtypes.html" }, { name: "Data Structures (Lists, Tuples, Dictionaries)", link: "https://docs.python.org/3/tutorial/datastructures.html" }, { name: "Functions and Control Flow", link: "https://docs.python.org/3/tutorial/controlflow.html#defining-functions" }] },
+                    { module: "Level 2: Intermediate Python", topics: [{ name: "Object-Oriented Programming (OOP)", link: "https://docs.python.org/3/tutorial/classes.html" }, { name: "File Handling", link: "https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files" }, { name: "Modules and Packages", link: "https://docs.python.org/3/tutorial/modules.html" }, { name: "Virtual Environments (venv) and Pip", link: "https://docs.python.org/3/library/venv.html" }] },
+                    { module: "Level 3: Advanced Python", topics: [{ name: "List Comprehensions and Generators", link: "https://docs.python.org/3/howto/functional.html" }, { name: "Decorators", link: "https://realpython.com/primer-on-python-decorators/" }, { name: "Asynchronous Programming (asyncio)", link: "https://docs.python.org/3/library/asyncio.html" }, { name: "Testing with Pytest", link: "https://docs.pytest.org/en/stable/getting-started.html" }] },
+                    { module: "Level 4: Ecosystem and Specialization", topics: [{ name: "Web with Django or Flask", link: "https://www.djangoproject.com/start/" }, { name: "APIs with FastAPI", link: "https://fastapi.tiangolo.com/" }, { name: "Data Science (Pandas, NumPy, Scikit-learn)", link: "https://pandas.pydata.org/docs/getting_started/index.html" }, { name: "Machine Learning (TensorFlow, PyTorch)", link: "https://www.tensorflow.org/tutorials" }, { name: "Automation and Scripting", link: "https://automatetheboringstuff.com/" }] }
                 ]
             },
              csharp: {
                 pt: [
-                    { module: "Módulo 1: C# - A Base", topics: ["Sintaxe e Ambiente (.NET SDK)", { name: "Métodos e Escopo", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Listas e Dicionários", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/arrays/" }, "Manipulação de Strings", "Tratamento de Exceções"] },
-                    { module: "Módulo 2: C# Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "LINQ", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/linq/" }, "Generics", "Programação Assíncrona (async/await)", "Delegates e Eventos"] },
-                    { module: "Módulo 3: Ecossistema C#", topics: [{ name: "Gerenciador de Pacotes (NuGet)", link: "https://learn.microsoft.com/pt-br/nuget/what-is-nuget" }, { name: "ASP.NET Core para Web/APIs", link: "https://learn.microsoft.com/pt-br/aspnet/core/" }, "Entity Framework Core (ORM)", { name: "Testes (xUnit, NUnit)", link: "https://xunit.net/" }, "Desktop (WPF, MAUI)", "Jogos (Unity)"] },
+                    { module: "Nível 1: C# Iniciante", topics: [{ name: "Configurando o Ambiente (.NET, VS Code)", link: "https://learn.microsoft.com/pt-br/dotnet/core/install/" }, { name: "Variáveis, Tipos e Operadores", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/language-reference/builtin-types/value-types" }, { name: "Métodos e Controle de Fluxo", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Listas e Dicionários", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/arrays/" }] },
+                    { module: "Nível 2: C# Intermediário", topics: [{ name: "Programação Orientada a Objetos (POO)", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "Interfaces e Classes Abstratas", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/language-reference/keywords/interface" }, { name: "Tratamento de Exceções", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/language-reference/keywords/try-catch" }, { name: "Gerenciador de Pacotes (NuGet)", link: "https://learn.microsoft.com/pt-br/nuget/what-is-nuget" }] },
+                    { module: "Nível 3: C# Avançado", topics: [{ name: "LINQ para Consultas", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/linq/" }, { name: "Generics", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/generics/" }, { name: "Programação Assíncrona (async/await)", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/asynchronous-programming/async-scenarios" }, { name: "Delegates, Eventos e Funções Lambda", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/events/" }] },
+                    { module: "Nível 4: Ecossistema e Especialização", topics: [{ name: "APIs Web com ASP.NET Core", link: "https://learn.microsoft.com/pt-br/aspnet/core/tutorials/first-web-api" }, { name: "ORM com Entity Framework Core", link: "https://learn.microsoft.com/pt-br/ef/core/" }, { name: "Testes com xUnit", link: "https://xunit.net/docs/getting-started/netcore/cmdline" }, { name: "Microsserviços e Integração com Azure", link: "https://azure.microsoft.com/pt-br/solutions/microservice-applications/" }, { name: "Desenvolvimento de Jogos com Unity", link: "https://learn.unity.com/" }] }
                 ],
                 en: [
-                    { module: "Module 1: C# - The Base", topics: ["Syntax and Environment (.NET SDK)", { name: "Methods and Scope", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Lists, and Dictionaries", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/arrays/" }, "String Manipulation", "Exception Handling"] },
-                    { module: "Module 2: Advanced C#", topics: [{ name: "Object-Oriented Programming", link: "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "LINQ", link: "https://learn.microsoft.com/en-us/dotnet/csharp/linq/" }, "Generics", "Asynchronous Programming (async/await)", "Delegates and Events"] },
-                    { module: "Module 3: C# Ecosystem", topics: [{ name: "Package Manager (NuGet)", link: "https://learn.microsoft.com/en-us/nuget/what-is-nuget" }, { name: "ASP.NET Core for Web/APIs", link: "https://learn.microsoft.com/en-us/aspnet/core/" }, "Entity Framework Core (ORM)", { name: "Testing (xUnit, NUnit)", link: "https://xunit.net/" }, "Desktop (WPF, MAUI)", "Game Development (Unity)"] },
+                    { module: "Level 1: Beginner C#", topics: [{ name: "Setting up the Environment (.NET, VS Code)", link: "https://learn.microsoft.com/en-us/dotnet/core/install/" }, { name: "Variables, Types, and Operators", link: "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/value-types" }, { name: "Methods and Control Flow", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Lists, and Dictionaries", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/arrays/" }] },
+                    { module: "Level 2: Intermediate C#", topics: [{ name: "Object-Oriented Programming (OOP)", link: "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "Interfaces and Abstract Classes", link: "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/interface" }, { name: "Exception Handling", link: "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/try-catch" }, { name: "Package Manager (NuGet)", link: "https://learn.microsoft.com/en-us/nuget/what-is-nuget" }] },
+                    { module: "Level 3: Advanced C#", topics: [{ name: "LINQ for Queries", link: "https://learn.microsoft.com/en-us/dotnet/csharp/linq/" }, { name: "Generics", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/" }, { name: "Asynchronous Programming (async/await)", link: "https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-scenarios" }, { name: "Delegates, Events, and Lambda Functions", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/events/" }] },
+                    { module: "Level 4: Ecosystem and Specialization", topics: [{ name: "Web APIs with ASP.NET Core", link: "https://learn.microsoft.com/en-us/aspnet/core/tutorials/first-web-api" }, { name: "ORM with Entity Framework Core", link: "https://learn.microsoft.com/en-us/ef/core/" }, { name: "Testing with xUnit", link: "https://xunit.net/docs/getting-started/netcore/cmdline" }, { name: "Microservices and Azure Integration", link: "https://azure.microsoft.com/en-us/solutions/microservice-applications/" }, { name: "Game Development with Unity", link: "https://learn.unity.com/" }] }
                 ]
             },
             java: {
                 pt: [
-                    { module: "Módulo 1: Java - A Base", topics: ["Sintaxe e Ambiente (JDK, Maven/Gradle)", { name: "Métodos e Escopo", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays e Collections (List, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, "Manipulação de Strings", "Tratamento de Exceções"] },
-                    { module: "Módulo 2: Java Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Streams API e Lambda", link: "https://www.baeldung.com/java-8-streams" }, "Generics", "Programação Concorrente (Threads)", "JDBC"] },
-                    { module: "Módulo 3: Ecossistema Java", topics: [{ name: "Gerenciador de Dependências (Maven/Gradle)", link: "https://maven.apache.org/" }, { name: "Framework Spring e Spring Boot", link: "https://spring.io/projects/spring-boot" }, "Hibernate (ORM)", { name: "Testes (JUnit, Mockito)", link: "https://junit.org/junit5/" }, "Desenvolvimento Android", "Microsserviços"] },
+                    { module: "Nível 1: Java Iniciante", topics: [{ name: "Configurando o Ambiente (JDK, Maven, VS Code)", link: "https://code.visualstudio.com/docs/java/java-tutorial" }, { name: "Variáveis, Tipos e Operadores", link: "https://www.w3schools.com/java/java_variables.asp" }, { name: "Métodos e Controle de Fluxo", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays e Estruturas de Repetição", link: "https://www.w3schools.com/java/java_arrays.asp" }] },
+                    { module: "Nível 2: Java Intermediário", topics: [{ name: "Programação Orientada a Objetos (POO)", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Collections Framework (List, Set, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, { name: "Tratamento de Exceções", link: "https://www.w3schools.com/java/java_try_catch.asp" }, { name: "Gerenciador de Dependências (Maven/Gradle)", link: "https://maven.apache.org/guides/getting-started/index.html" }] },
+                    { module: "Nível 3: Java Avançado", topics: [{ name: "Streams API e Funções Lambda", link: "https://www.baeldung.com/java-8-streams" }, { name: "Generics", link: "https://docs.oracle.com/javase/tutorial/java/generics/index.html" }, { name: "Programação Concorrente (Threads)", link: "https://www.baeldung.com/java-concurrency" }, { name: "JDBC e Conexão com Banco de Dados", link: "https://www.javatpoint.com/java-jdbc" }] },
+                    { module: "Nível 4: Ecossistema e Especialização", topics: [{ name: "Framework Spring e Spring Boot", link: "https://spring.io/quickstart" }, { name: "ORM com Spring Data JPA / Hibernate", link: "https://spring.io/projects/spring-data-jpa" }, { name: "Testes com JUnit e Mockito", link: "https://junit.org/junit5/docs/current/user-guide/" }, { name: "Microsserviços com Spring Cloud", link: "https://spring.io/projects/spring-cloud" }, { name: "Desenvolvimento Android", link: "https://developer.android.com/training/basics/firstapp" }] }
                 ],
                 en: [
-                    { module: "Module 1: Java - The Base", topics: ["Syntax and Environment (JDK, Maven/Gradle)", { name: "Methods and Scope", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays and Collections (List, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, "String Manipulation", "Exception Handling"] },
-                    { module: "Module 2: Advanced Java", topics: [{ name: "Object-Oriented Programming", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Streams API and Lambda", link: "https://www.baeldung.com/java-8-streams" }, "Generics", "Concurrent Programming (Threads)", "JDBC"] },
-                    { module: "Module 3: Java Ecosystem", topics: [{ name: "Dependency Management (Maven/Gradle)", link: "https://maven.apache.org/" }, { name: "Spring Framework and Spring Boot", link: "https://spring.io/projects/spring-boot" }, "Hibernate (ORM)", { name: "Testing (JUnit, Mockito)", link: "https://junit.org/junit5/" }, "Android Development", "Microservices"] },
+                    { module: "Level 1: Beginner Java", topics: [{ name: "Setting up the Environment (JDK, Maven, VS Code)", link: "https://code.visualstudio.com/docs/java/java-tutorial" }, { name: "Variables, Types, and Operators", link: "https://www.w3schools.com/java/java_variables.asp" }, { name: "Methods and Control Flow", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays and Looping Structures", link: "https://www.w3schools.com/java/java_arrays.asp" }] },
+                    { module: "Level 2: Intermediate Java", topics: [{ name: "Object-Oriented Programming (OOP)", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Collections Framework (List, Set, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, { name: "Exception Handling", link: "https://www.w3schools.com/java/java_try_catch.asp" }, { name: "Dependency Management (Maven/Gradle)", link: "https://maven.apache.org/guides/getting-started/index.html" }] },
+                    { module: "Level 3: Advanced Java", topics: [{ name: "Streams API and Lambda Functions", link: "https://www.baeldung.com/java-8-streams" }, { name: "Generics", link: "https://docs.oracle.com/javase/tutorial/java/generics/index.html" }, { name: "Concurrent Programming (Threads)", link: "https://www.baeldung.com/java-concurrency" }, { name: "JDBC and Database Connectivity", link: "https://www.javatpoint.com/java-jdbc" }] },
+                    { module: "Level 4: Ecosystem and Specialization", topics: [{ name: "Spring Framework and Spring Boot", link: "https://spring.io/quickstart" }, { name: "ORM with Spring Data JPA / Hibernate", link: "https://spring.io/projects/spring-data-jpa" }, { name: "Unit Testing with JUnit and Mockito", link: "https://junit.org/junit5/docs/current/user-guide/" }, { name: "Microservices with Spring Cloud", link: "https://spring.io/projects/spring-cloud" }, { name: "Android Development", link: "https://developer.android.com/training/basics/firstapp" }] }
                 ]
             },
             rust: {
                 pt: [
-                    { module: "Módulo 1: Rust - A Base", topics: ["Sintaxe e Ambiente (Rustup, Cargo)", { name: "Ownership e Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs e Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }, "Coleções Comuns", { name: "Tratamento de Erros (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }] },
-                    { module: "Módulo 2: Rust Avançado", topics: [{ name: "Traits", link: "https://doc.rust-lang.org/book/ch10-02-traits.html" }, { name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, "Closures e Iterators", "Testes em Rust", "Módulos e Crates"] },
-                    { module: "Módulo 3: Ecossistema Rust", topics: [{ name: "Gerenciador de Pacotes (Cargo)", link: "https://doc.rust-lang.org/cargo/" }, { name: "Desenvolvimento Web (Actix, Rocket)", link: "https://actix.rs/" }, "Programação de Sistemas", "CLI com Clap", "WebAssembly (WASM)"] },
+                    { module: "Nível 1: Rust Iniciante", topics: [{ name: "Instalando Rust (rustup) e Cargo", link: "https://www.rust-lang.org/tools/install" }, { name: "Variáveis, Tipos e Funções", link: "https://doc.rust-lang.org/book/ch03-00-common-programming-concepts.html" }, { name: "Ownership e Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs e Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }] },
+                    { module: "Nível 2: Rust Intermediário", topics: [{ name: "Coleções (Vector, String, HashMap)", link: "https://doc.rust-lang.org/book/ch08-00-common-collections.html" }, { name: "Tratamento de Erros (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }, { name: "Traits e Generics", link: "https://doc.rust-lang.org/book/ch10-00-generics.html" }, { name: "Testes em Rust", link: "https://doc.rust-lang.org/book/ch11-00-testing.html" }] },
+                    { module: "Nível 3: Rust Avançado", topics: [{ name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, { name: "Closures e Iterators", link: "https://doc.rust-lang.org/book/ch13-00-functional-features.html" }, { name: "Smart Pointers", link: "https://doc.rust-lang.org/book/ch15-00-smart-pointers.html" }, { name: "Concorrência Segura", link: "https://doc.rust-lang.org/book/ch16-00-concurrency.html" }] },
+                    { module: "Nível 4: Ecossistema e Especialização", topics: [{ name: "Macros", link: "https://doc.rust-lang.org/book/ch19-06-macros.html" }, { name: "Código Inseguro (Unsafe Rust)", link: "https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html" }, { name: "APIs Web com Actix Web ou Rocket", link: "https://actix.rs/docs/getting-started" }, { name: "Aplicações de Linha de Comando (CLI)", link: "https://rust-cli.github.io/book/index.html" }, { name: "WebAssembly (WASM)", link: "https://rustwasm.github.io/docs/book/" }] }
                 ],
                 en: [
-                    { module: "Module 1: Rust - The Base", topics: ["Syntax and Environment (Rustup, Cargo)", { name: "Ownership and Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs and Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }, "Common Collections", { name: "Error Handling (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }] },
-                    { module: "Module 2: Advanced Rust", topics: [{ name: "Traits", link: "https://doc.rust-lang.org/book/ch10-02-traits.html" }, { name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, "Closures and Iterators", "Testing in Rust", "Modules and Crates"] },
-                    { module: "Module 3: Rust Ecosystem", topics: [{ name: "Package Manager (Cargo)", link: "https://doc.rust-lang.org/cargo/" }, { name: "Web Development (Actix, Rocket)", link: "https://actix.rs/" }, "Systems Programming", "CLI with Clap", "WebAssembly (WASM)"] },
+                    { module: "Level 1: Beginner Rust", topics: [{ name: "Installing Rust (rustup) and Cargo", link: "https://www.rust-lang.org/tools/install" }, { name: "Variables, Types, and Functions", link: "https://doc.rust-lang.org/book/ch03-00-common-programming-concepts.html" }, { name: "Ownership and Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs and Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }] },
+                    { module: "Level 2: Intermediate Rust", topics: [{ name: "Collections (Vector, String, HashMap)", link: "https://doc.rust-lang.org/book/ch08-00-common-collections.html" }, { name: "Error Handling (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }, { name: "Traits and Generics", link: "https://doc.rust-lang.org/book/ch10-00-generics.html" }, { name: "Testing in Rust", link: "https://doc.rust-lang.org/book/ch11-00-testing.html" }] },
+                    { module: "Level 3: Advanced Rust", topics: [{ name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, { name: "Closures and Iterators", link: "https://doc.rust-lang.org/book/ch13-00-functional-features.html" }, { name: "Smart Pointers", link: "https://doc.rust-lang.org/book/ch15-00-smart-pointers.html" }, { name: "Fearless Concurrency", link: "https://doc.rust-lang.org/book/ch16-00-concurrency.html" }] },
+                    { module: "Level 4: Ecosystem and Specialization", topics: [{ name: "Macros", link: "https://doc.rust-lang.org/book/ch19-06-macros.html" }, { name: "Unsafe Rust", link: "https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html" }, { name: "Web APIs with Actix Web or Rocket", link: "https://actix.rs/docs/getting-started" }, { name: "Command-Line (CLI) Applications", link: "https://rust-cli.github.io/book/index.html" }, { name: "WebAssembly (WASM)", link: "https://rustwasm.github.io/docs/book/" }] }
                 ]
             }
         };
@@ -251,7 +279,7 @@
             pt: {
                 mainTitle: "Plano de Estudos de Programação",
                 mainSubtitle: "Sua jornada do básico ao avançado com acompanhamento de progresso e anotações.",
-                progressTitle: "Meu Progresso Geral",
+                progressTitle: "Meu Progresso no Plano Geral",
                 tabGeneral: "Plano Geral",
                 aiAssistantTitle: "Assistente IA",
                 chatPlaceholder: "Pergunte algo sobre programação...",
@@ -276,7 +304,7 @@
             en: {
                 mainTitle: "Programming Study Plan",
                 mainSubtitle: "Your journey from basic to advanced with progress tracking and notes.",
-                progressTitle: "My Overall Progress",
+                progressTitle: "My Progress on the General Plan",
                 tabGeneral: "General Plan",
                 aiAssistantTitle: "AI Assistant",
                 chatPlaceholder: "Ask something about programming...",
@@ -331,6 +359,10 @@
                     modalApiKeyPlaceholder: document.getElementById('api-key-input'),
                     saveApiKeyBtn: document.getElementById('save-api-key'),
                     cancelApiKeyBtn: document.getElementById('cancel-api-key'),
+                    infoModal: document.getElementById('info-modal'),
+                    infoModalTitle: document.getElementById('info-modal-title'),
+                    infoModalContent: document.getElementById('info-modal-content'),
+                    closeInfoModalBtn: document.getElementById('close-info-modal'),
                 };
                 this.init();
             }
@@ -351,7 +383,6 @@
                 this.apiKey = localStorage.getItem('googleApiKey') || '';
                 const savedProgress = JSON.parse(localStorage.getItem('studyProgress')) || {};
 
-                // Initialize progress for the general plan if not present
                 const generalStructure = contentData.general.pt;
                 if (!savedProgress.general || savedProgress.general.length !== generalStructure.length) {
                     savedProgress.general = generalStructure.map(mod => ({
@@ -378,7 +409,7 @@
                 this.elements.chatInput.placeholder = t.chatPlaceholder;
                 this.elements.modalApiKeyPlaceholder.placeholder = t.modalApiKeyPlaceholder;
                 this.elements.modalSteps.innerHTML = t.modalSteps.map(item => `<li>${item}</li>`).join('');
-                this.renderTabs(); // Re-render tabs for translation
+                this.renderTabs();
             }
 
             updateProgress() {
@@ -425,10 +456,7 @@
                         const topicName = typeof topic === 'string' ? topic : topic.name;
                         const topicLink = topic.link || null;
                         
-                        let topicContentHtml = `<span class="ml-3 text-slate-700 flex-grow">${topicName}</span>`;
-                        if (topicLink) {
-                            topicContentHtml += `<a href="${topicLink}" target="_blank" rel="noopener noreferrer" class="ml-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">${t.resourceButton}</a>`;
-                        }
+                        let topicContentHtml = `<a href="${topicLink}" target="_blank" rel="noopener noreferrer" class="ml-3 text-indigo-600 hover:underline flex-grow">${topicName}</a>`;
                         
                         if (isGeneralPlan) {
                             const progress = this.studyProgress.general[moduleIndex].topics[topicIndex];
@@ -440,7 +468,11 @@
                                     </label>
                                 </div>`;
                         } else {
-                            return `<div class="flex items-center py-2 border-b border-slate-100 last:border-b-0">${topicContentHtml}</div>`;
+                             let nonGeneralTopicHtml = `<span class="ml-3 text-slate-700 flex-grow">${topicName}</span>`;
+                            if (topicLink) {
+                                nonGeneralTopicHtml += `<a href="${topicLink}" target="_blank" rel="noopener noreferrer" class="ml-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">${t.resourceButton}</a>`;
+                            }
+                            return `<div class="flex items-center py-2 border-b border-slate-100 last:border-b-0">${nonGeneralTopicHtml}</div>`;
                         }
                     }).join('');
                     
