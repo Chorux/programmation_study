@@ -48,7 +48,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Estilos para o conteúdo formatado em Markdown */
         .message-content pre {
             background-color: #1E293B;
             color: #E2E8F0;
@@ -75,6 +74,14 @@
             margin-bottom: 0.5rem;
             list-style: revert;
         }
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-button.active {
+            background-color: #4F46E5;
+            color: white;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -99,29 +106,17 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Seção de Rotinas -->
-            <div class="mb-10">
-                <h2 id="routines-title" class="text-3xl font-bold text-center mb-6 text-slate-900"></h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <h3 id="daily-routine-title" class="text-xl font-semibold mb-3 text-indigo-700"></h3>
-                        <ul id="daily-routine-list" class="space-y-2 text-slate-600 list-disc list-inside"></ul>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <h3 id="weekly-routine-title" class="text-xl font-semibold mb-3 text-indigo-700"></h3>
-                        <ul id="weekly-routine-list" class="space-y-2 text-slate-600 list-disc list-inside"></ul>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                        <h3 id="monthly-routine-title" class="text-xl font-semibold mb-3 text-indigo-700"></h3>
-                        <ul id="monthly-routine-list" class="space-y-2 text-slate-600 list-disc list-inside"></ul>
-                    </div>
+            
+            <!-- Abas de Conteúdo -->
+            <div class="mb-8">
+                <div id="tab-selector" class="flex flex-wrap justify-center border-b border-slate-200">
+                    <!-- Abas serão inseridas aqui -->
                 </div>
             </div>
 
-            <!-- Conteúdo dos Módulos de Estudo -->
+            <!-- Conteúdo dos Módulos -->
             <div id="modulesContainer" class="space-y-6">
-                <!-- Os módulos serão inseridos aqui pelo JavaScript -->
+                <!-- Os módulos serão inseridos aqui -->
             </div>
         </main>
         
@@ -167,18 +162,97 @@
     </div>
 
     <script>
+        const contentData = {
+            general: {
+                pt: [
+                    { module: "Módulo 1: Fundamentos Essenciais", topics: [{ name: "Lógica de Programação e Algoritmos", link: "https://www.cursoemvideo.com/course/curso-de-algoritmos/" }, { name: "Tipos de Dados e Variáveis", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operadores", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Estruturas Condicionais", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Estruturas de Repetição", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
+                    { module: "Módulo 2: Linguagem de Programação (Base)", topics: ["Sintaxe e Ambiente", "Funções e Escopo", "Estruturas de Dados Nativas", "Manipulação de Strings e Números", "Tratamento de Erros"] },
+                    { module: "Módulo 3: Estruturas de Dados", topics: ["Arrays e Matrizes", "Pilhas e Filas", "Listas Encadeadas", "Árvores", "Grafos", "Tabelas Hash"] },
+                    { module: "Módulo 4: Algoritmos Avançados", topics: ["Análise de Complexidade (Big O)", "Busca e Ordenação", "Recursividade", "Programação Dinâmica"] },
+                    { module: "Módulo 5: Paradigmas de Programação", topics: ["Programação Orientada a Objetos", "Programação Funcional", "Padrões de Projeto (Design Patterns)"] },
+                    { module: "Módulo 6: Banco de Dados", topics: ["Banco de Dados Relacionais (SQL)", "Banco de Dados NoSQL", "Modelagem de Dados", "ORM (Mapeamento Objeto-Relacional)"] },
+                    { module: "Módulo 7: Ferramentas e Boas Práticas", topics: ["Controle de Versão (Git e GitHub)", "Linha de Comando", "Testes de Software", "Princípios de Design (SOLID, DRY)", "APIs REST"] },
+                    { module: "Módulo 8: Tópicos Avançados", topics: ["Concorrência e Paralelismo", "Arquitetura de Software", "Segurança", "Cloud Computing", "Containers (Docker)"] },
+                ],
+                en: [
+                    { module: "Module 1: Essential Fundamentals", topics: [{ name: "Programming Logic and Algorithms", link: "https://www.geeksforgeeks.org/introduction-to-algorithms/" }, { name: "Data Types and Variables", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operators", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Conditional Statements", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Looping Structures", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
+                    { module: "Module 2: Programming Language (Base)", topics: ["Syntax and Environment", "Functions and Scope", "Native Data Structures", "String and Number Manipulation", "Error Handling"] },
+                    { module: "Module 3: Data Structures", topics: ["Arrays and Matrices", "Stacks and Queues", "Linked Lists", "Trees", "Graphs", "Hash Tables"] },
+                    { module: "Module 4: Advanced Algorithms", topics: ["Complexity Analysis (Big O)", "Searching and Sorting", "Recursion", "Dynamic Programming"] },
+                    { module: "Module 5: Programming Paradigms", topics: ["Object-Oriented Programming", "Functional Programming", "Design Patterns"] },
+                    { module: "Module 6: Databases", topics: ["Relational Databases (SQL)", "NoSQL Databases", "Data Modeling", "ORM (Object-Relational Mapping)"] },
+                    { module: "Module 7: Tools and Best Practices", topics: ["Version Control (Git and GitHub)", "Command Line", "Software Testing", "Design Principles (SOLID, DRY)", "REST APIs"] },
+                    { module: "Module 8: Advanced Topics", topics: ["Concurrency and Parallelism", "Software Architecture", "Security", "Cloud Computing", "Containers (Docker)"] },
+                ]
+            },
+            js: {
+                pt: [
+                    { module: "Módulo 1: JavaScript - A Base", topics: ["Sintaxe e Ambiente (Node.js, Navegador)", { name: "Funções e Escopo", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Functions" }, { name: "Arrays e Objetos", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "Manipulação do DOM", { name: "Tratamento de Erros", link: "https://www.w3schools.com/js/js_errors.asp" }] },
+                    { module: "Módulo 2: JavaScript Avançado", topics: [{ name: "Programação Assíncrona (Promises, async/await)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Módulos (import/export)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Modules" }, "POO (Prototypes, Classes)", "Programação Funcional (map, filter, reduce)", "Event Loop"] },
+                    { module: "Módulo 3: Ecossistema JS", topics: [{ name: "Gerenciador de Pacotes (NPM/Yarn)", link: "https://docs.npmjs.com/about-npm" }, { name: "Frameworks (React, Vue ou Angular)", link: "https://react.dev/" }, "Bundlers (Webpack, Vite)", { name: "Testes (Jest, Testing Library)", link: "https://jestjs.io/" }, "TypeScript", { name: "Node.js e Express.js", link: "https://expressjs.com/pt-br/" }] },
+                ],
+                en: [
+                    { module: "Module 1: JavaScript - The Base", topics: ["Syntax and Environment (Node.js, Browser)", { name: "Functions and Scope", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" }, { name: "Arrays and Objects", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "DOM Manipulation", { name: "Error Handling", link: "https://www.w3schools.com/js/js_errors.asp" }] },
+                    { module: "Module 2: Advanced JavaScript", topics: [{ name: "Asynchronous Programming (Promises, async/await)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises" }, { name: "Modules (import/export)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" }, "OOP (Prototypes, Classes)", "Functional Programming (map, filter, reduce)", "Event Loop"] },
+                    { module: "Module 3: JS Ecosystem", topics: [{ name: "Package Managers (NPM/Yarn)", link: "https://docs.npmjs.com/about-npm" }, { name: "Frameworks (React, Vue, or Angular)", link: "https://react.dev/" }, "Bundlers (Webpack, Vite)", { name: "Testing (Jest, Testing Library)", link: "https://jestjs.io/" }, "TypeScript", { name: "Node.js and Express.js", link: "https://expressjs.com/" }] },
+                ]
+            },
+            python: {
+                pt: [
+                    { module: "Módulo 1: Python - A Base", topics: ["Sintaxe e Ambiente (Python 3, venv)", { name: "Funções e Escopo", link: "https://docs.python.org/pt-br/3/tutorial/controlflow.html#defining-functions" }, { name: "Estruturas de Dados (list, tuple, dict, set)", link: "https://docs.python.org/pt-br/3/tutorial/datastructures.html" }, "Manipulação de Arquivos", { name: "Tratamento de Erros", link: "https://docs.python.org/pt-br/3/tutorial/errors.html" }] },
+                    { module: "Módulo 2: Python Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://docs.python.org/pt-br/3/tutorial/classes.html" }, { name: "Programação Funcional (List Comprehensions, Lambda)", link: "https://docs.python.org/pt-br/3/howto/functional.html" }, "Módulos e Pacotes", "Decorators", "Generators"] },
+                    { module: "Módulo 3: Ecossistema Python", topics: [{ name: "Gerenciador de Pacotes (Pip)", link: "https://pip.pypa.io/en/stable/" }, { name: "Frameworks Web (Django ou Flask)", link: "https://www.djangoproject.com/" }, "Análise de Dados (Pandas, NumPy)", { name: "Testes (Pytest, Unittest)", link: "https://docs.pytest.org/en/stable/" }, "APIs com FastAPI", "Automação de Tarefas"] },
+                ],
+                en: [
+                    { module: "Module 1: Python - The Base", topics: ["Syntax and Environment (Python 3, venv)", { name: "Functions and Scope", link: "https://docs.python.org/3/tutorial/controlflow.html#defining-functions" }, { name: "Data Structures (list, tuple, dict, set)", link: "https://docs.python.org/3/tutorial/datastructures.html" }, "File Handling", { name: "Error Handling", link: "https://docs.python.org/3/tutorial/errors.html" }] },
+                    { module: "Module 2: Advanced Python", topics: [{ name: "Object-Oriented Programming", link: "https://docs.python.org/3/tutorial/classes.html" }, { name: "Functional Programming (List Comprehensions, Lambda)", link: "https://docs.python.org/3/howto/functional.html" }, "Modules and Packages", "Decorators", "Generators"] },
+                    { module: "Module 3: Python Ecosystem", topics: [{ name: "Package Manager (Pip)", link: "https://pip.pypa.io/en/stable/" }, { name: "Web Frameworks (Django or Flask)", link: "https://www.djangoproject.com/" }, "Data Analysis (Pandas, NumPy)", { name: "Testing (Pytest, Unittest)", link: "https://docs.pytest.org/en/stable/" }, "APIs with FastAPI", "Task Automation"] },
+                ]
+            },
+             csharp: {
+                pt: [
+                    { module: "Módulo 1: C# - A Base", topics: ["Sintaxe e Ambiente (.NET SDK)", { name: "Métodos e Escopo", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Listas e Dicionários", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/programming-guide/arrays/" }, "Manipulação de Strings", "Tratamento de Exceções"] },
+                    { module: "Módulo 2: C# Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "LINQ", link: "https://learn.microsoft.com/pt-br/dotnet/csharp/linq/" }, "Generics", "Programação Assíncrona (async/await)", "Delegates e Eventos"] },
+                    { module: "Módulo 3: Ecossistema C#", topics: [{ name: "Gerenciador de Pacotes (NuGet)", link: "https://learn.microsoft.com/pt-br/nuget/what-is-nuget" }, { name: "ASP.NET Core para Web/APIs", link: "https://learn.microsoft.com/pt-br/aspnet/core/" }, "Entity Framework Core (ORM)", { name: "Testes (xUnit, NUnit)", link: "https://xunit.net/" }, "Desktop (WPF, MAUI)", "Jogos (Unity)"] },
+                ],
+                en: [
+                    { module: "Module 1: C# - The Base", topics: ["Syntax and Environment (.NET SDK)", { name: "Methods and Scope", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/methods" }, { name: "Arrays, Lists, and Dictionaries", link: "https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/arrays/" }, "String Manipulation", "Exception Handling"] },
+                    { module: "Module 2: Advanced C#", topics: [{ name: "Object-Oriented Programming", link: "https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/tutorials/oop" }, { name: "LINQ", link: "https://learn.microsoft.com/en-us/dotnet/csharp/linq/" }, "Generics", "Asynchronous Programming (async/await)", "Delegates and Events"] },
+                    { module: "Module 3: C# Ecosystem", topics: [{ name: "Package Manager (NuGet)", link: "https://learn.microsoft.com/en-us/nuget/what-is-nuget" }, { name: "ASP.NET Core for Web/APIs", link: "https://learn.microsoft.com/en-us/aspnet/core/" }, "Entity Framework Core (ORM)", { name: "Testing (xUnit, NUnit)", link: "https://xunit.net/" }, "Desktop (WPF, MAUI)", "Game Development (Unity)"] },
+                ]
+            },
+            java: {
+                pt: [
+                    { module: "Módulo 1: Java - A Base", topics: ["Sintaxe e Ambiente (JDK, Maven/Gradle)", { name: "Métodos e Escopo", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays e Collections (List, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, "Manipulação de Strings", "Tratamento de Exceções"] },
+                    { module: "Módulo 2: Java Avançado", topics: [{ name: "Programação Orientada a Objetos", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Streams API e Lambda", link: "https://www.baeldung.com/java-8-streams" }, "Generics", "Programação Concorrente (Threads)", "JDBC"] },
+                    { module: "Módulo 3: Ecossistema Java", topics: [{ name: "Gerenciador de Dependências (Maven/Gradle)", link: "https://maven.apache.org/" }, { name: "Framework Spring e Spring Boot", link: "https://spring.io/projects/spring-boot" }, "Hibernate (ORM)", { name: "Testes (JUnit, Mockito)", link: "https://junit.org/junit5/" }, "Desenvolvimento Android", "Microsserviços"] },
+                ],
+                en: [
+                    { module: "Module 1: Java - The Base", topics: ["Syntax and Environment (JDK, Maven/Gradle)", { name: "Methods and Scope", link: "https://www.w3schools.com/java/java_methods.asp" }, { name: "Arrays and Collections (List, Map)", link: "https://www.geeksforgeeks.org/collections-in-java-2/" }, "String Manipulation", "Exception Handling"] },
+                    { module: "Module 2: Advanced Java", topics: [{ name: "Object-Oriented Programming", link: "https://www.w3schools.com/java/java_oop.asp" }, { name: "Streams API and Lambda", link: "https://www.baeldung.com/java-8-streams" }, "Generics", "Concurrent Programming (Threads)", "JDBC"] },
+                    { module: "Module 3: Java Ecosystem", topics: [{ name: "Dependency Management (Maven/Gradle)", link: "https://maven.apache.org/" }, { name: "Spring Framework and Spring Boot", link: "https://spring.io/projects/spring-boot" }, "Hibernate (ORM)", { name: "Testing (JUnit, Mockito)", link: "https://junit.org/junit5/" }, "Android Development", "Microservices"] },
+                ]
+            },
+            rust: {
+                pt: [
+                    { module: "Módulo 1: Rust - A Base", topics: ["Sintaxe e Ambiente (Rustup, Cargo)", { name: "Ownership e Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs e Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }, "Coleções Comuns", { name: "Tratamento de Erros (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }] },
+                    { module: "Módulo 2: Rust Avançado", topics: [{ name: "Traits", link: "https://doc.rust-lang.org/book/ch10-02-traits.html" }, { name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, "Closures e Iterators", "Testes em Rust", "Módulos e Crates"] },
+                    { module: "Módulo 3: Ecossistema Rust", topics: [{ name: "Gerenciador de Pacotes (Cargo)", link: "https://doc.rust-lang.org/cargo/" }, { name: "Desenvolvimento Web (Actix, Rocket)", link: "https://actix.rs/" }, "Programação de Sistemas", "CLI com Clap", "WebAssembly (WASM)"] },
+                ],
+                en: [
+                    { module: "Module 1: Rust - The Base", topics: ["Syntax and Environment (Rustup, Cargo)", { name: "Ownership and Borrowing", link: "https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html" }, { name: "Structs and Enums", link: "https://doc.rust-lang.org/book/ch05-00-structs.html" }, "Common Collections", { name: "Error Handling (Result, Option)", link: "https://doc.rust-lang.org/book/ch09-00-error-handling.html" }] },
+                    { module: "Module 2: Advanced Rust", topics: [{ name: "Traits", link: "https://doc.rust-lang.org/book/ch10-02-traits.html" }, { name: "Lifetimes", link: "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html" }, "Closures and Iterators", "Testing in Rust", "Modules and Crates"] },
+                    { module: "Module 3: Rust Ecosystem", topics: [{ name: "Package Manager (Cargo)", link: "https://doc.rust-lang.org/cargo/" }, { name: "Web Development (Actix, Rocket)", link: "https://actix.rs/" }, "Systems Programming", "CLI with Clap", "WebAssembly (WASM)"] },
+                ]
+            }
+        };
+
         const translations = {
             pt: {
                 mainTitle: "Plano de Estudos de Programação",
                 mainSubtitle: "Sua jornada do básico ao avançado com acompanhamento de progresso e anotações.",
                 progressTitle: "Meu Progresso Geral",
-                routinesTitle: "Rotinas de Estudo",
-                dailyRoutineTitle: "Diária",
-                dailyRoutineList: ["1-2 horas de estudo focado.", "30 min de prática (CodeWars, LeetCode).", "Revisar o que foi estudado no dia anterior."],
-                weeklyRoutineTitle: "Semanal",
-                weeklyRoutineList: ["Definir 1-2 metas principais para a semana.", "Trabalhar em um mini-projeto prático.", "Revisar todos os tópicos da semana no sábado."],
-                monthlyRoutineTitle: "Mensal",
-                monthlyRoutineList: ["Concluir um módulo ou um projeto maior.", "Avaliar o progresso e reajustar o plano.", "Aprender uma nova ferramenta ou tecnologia."],
+                tabGeneral: "Plano Geral",
                 aiAssistantTitle: "Assistente IA",
                 chatPlaceholder: "Pergunte algo sobre programação...",
                 sendButton: "Enviar",
@@ -197,29 +271,13 @@
                 systemMsgWelcome: "Bem-vindo! Para começar, configure sua chave de API do Google AI nas configurações (⚙️) no canto superior direito.",
                 systemMsgReady: "Assistente pronto! Faça sua pergunta.",
                 systemMsgError: "Ocorreu um erro. Verifique se sua chave de API está correta e se há conexão com a internet.",
-                systemMsgNoResponse: "Desculpe, não consegui gerar uma resposta.",
-                studyPlan: [
-                    { module: "Módulo 1: Fundamentos Essenciais", topics: [{ name: "Lógica de Programação e Algoritmos", link: "https://www.cursoemvideo.com/course/curso-de-algoritmos/" }, { name: "Tipos de Dados e Variáveis", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operadores (Aritméticos, Lógicos, Comparação)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Estruturas Condicionais (if, else, switch)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Estruturas de Repetição (for, while)", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
-                    { module: "Módulo 2: Linguagem de Programação (Base)", topics: ["Sintaxe Básica e Ambiente (Python/JavaScript)", { name: "Funções, Parâmetros e Retorno", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Functions" }, "Escopo de Variáveis (Global, Local)", { name: "Estruturas de Dados Nativas (Listas/Arrays, Dicionários/Objetos)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "Manipulação de Strings e Números", { name: "Tratamento de Erros e Exceções (try...catch)", link: "https://www.w3schools.com/js/js_errors.asp" }] },
-                    { module: "Módulo 3: Estruturas de Dados", topics: [{ name: "Arrays e Matrizes", link: "https://www.geeksforgeeks.org/array-data-structure/" }, { name: "Pilhas (Stacks)", link: "https://www.geeksforgeeks.org/stack-data-structure/" }, { name: "Filas (Queues)", link: "https://www.geeksforgeeks.org/queue-data-structure/" }, { name: "Listas Encadeadas (Singly, Doubly)", link: "https://www.geeksforgeeks.org/data-structures/linked-list/" }, { name: "Árvores (Binárias, de Busca - BST)", link: "https://www.geeksforgeeks.org/binary-search-tree-data-structure/" }, "Heaps (Min/Max Heap)", { name: "Tabelas Hash (Hashmaps)", link: "https://www.geeksforgeeks.org/hashing-data-structure/" }, "Grafos (Conceitos e Representações)", "Tries (Árvore de prefixos)"] },
-                    { module: "Módulo 4: Algoritmos Avançados", topics: [{ name: "Análise de Complexidade (Big O Notation)", link: "https://www.geeksforgeeks.org/analysis-algorithms-big-o-analysis/" }, "Estratégia 'Dividir e Conquistar'", { name: "Algoritmos de Busca (Linear, Binária)", link: "https://www.khanacademy.org/computing/computer-science/algorithms/binary-search/a/binary-search" }, { name: "Algoritmos de Ordenação (Bubble, Selection, Insertion, Merge, Quick Sort)", link: "https://www.geeksforgeeks.org/sorting-algorithms/" }, "Recursividade Avançada", "Programação Dinâmica (Conceitos)", "Algoritmos Gulosos (Greedy)"] },
-                    { module: "Módulo 5: Paradigmas de Programação", topics: [{ name: "Programação Orientada a Objetos (Classes, Herança, Polimorfismo, Encapsulamento)", link: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide/Details_of_the_Object_Model" }, { name: "Programação Funcional (Funções Puras, Imutabilidade, High-Order Functions)", link: "https://www.geeksforgeeks.org/functional-programming-paradigm/" }, "Programação procedural vs declarativa", { name: "Design Patterns (Padrões de Projeto): Singleton, Factory, Observer", link: "https://refactoring.guru/design-patterns" }] },
-                    { module: "Módulo 6: Banco de Dados", topics: ["Conceitos de Banco de Dados Relacionais", { name: "Linguagem SQL (SELECT, INSERT, UPDATE, DELETE, JOINs)", link: "https://www.w3schools.com/sql/" }, "Modelagem de Dados (Entidade-Relacionamento)", { name: "Conceitos de Banco de Dados NoSQL (Documental, Chave-Valor, Colunar)", link: "https://www.mongodb.com/nosql-explained" }, "ORM (Object-Relational Mapping) - Conceitos e Prática", "Transações (ACID)"] },
-                    { module: "Módulo 7: Ferramentas e Boas Práticas", topics: [{ name: "Controle de Versão com Git e GitHub", link: "https://git-scm.com/book/pt-br/v2" }, "Linha de Comando (Terminal/Shell)", { name: "Gerenciadores de Pacotes (NPM/Yarn, Pip)", link: "https://docs.npmjs.com/about-npm" }, { name: "Testes de Software (Unitários, Integração, E2E)", link: "https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing" }, { name: "Princípios de Design (SOLID, DRY, KISS)", link: "https://www.digitalocean.com/community/conceptual_articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design" }, "Depuração (Debugging) de Código", { name: "APIs REST (Conceitos, Métodos HTTP, Consumo)", link: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status" }, "CI/CD - Integração e Entrega Contínua (Conceitos)"] },
-                    { module: "Módulo 8: Tópicos Avançados e Especialização", topics: ["Concorrência e Paralelismo (Threads, Async/Await)", "Arquitetura de Software (Monolito, Microsserviços, Serverless)", { name: "Segurança da Informação (OWASP Top 10)", link: "https://owasp.org/www-project-top-ten/" }, { name: "Cloud Computing (AWS/Azure/GCP - Conceitos)", link: "https://aws.amazon.com/what-is-cloud-computing/" }, { name: "Containers (Docker - Conceitos e Prática)", link: "https://www.docker.com/get-started/" }, "Filas de Mensagens (RabbitMQ/Kafka - Conceitos)", "WebSockets e GraphQL", { name: "Explorar Roadmap Completo de Backend", link: "https://roadmap.sh/backend" }] }
-                ]
+                systemMsgNoResponse: "Desculpe, não consegui gerar uma resposta."
             },
             en: {
                 mainTitle: "Programming Study Plan",
                 mainSubtitle: "Your journey from basic to advanced with progress tracking and notes.",
                 progressTitle: "My Overall Progress",
-                routinesTitle: "Study Routines",
-                dailyRoutineTitle: "Daily",
-                dailyRoutineList: ["1-2 hours of focused study.", "30 min of practice (CodeWars, LeetCode).", "Review what was studied the day before."],
-                weeklyRoutineTitle: "Weekly",
-                weeklyRoutineList: ["Set 1-2 main goals for the week.", "Work on a practical mini-project.", "Review all topics of the week on Saturday."],
-                monthlyRoutineTitle: "Monthly",
-                monthlyRoutineList: ["Complete a module or a larger project.", "Evaluate progress and readjust the plan.", "Learn a new tool or technology."],
+                tabGeneral: "General Plan",
                 aiAssistantTitle: "AI Assistant",
                 chatPlaceholder: "Ask something about programming...",
                 sendButton: "Send",
@@ -238,39 +296,23 @@
                 systemMsgWelcome: "Welcome! To get started, set your Google AI API key in the settings (⚙️) in the top right corner.",
                 systemMsgReady: "Assistant ready! Ask your question.",
                 systemMsgError: "An error occurred. Check if your API key is correct and if you have an internet connection.",
-                systemMsgNoResponse: "Sorry, I couldn't generate a response.",
-                studyPlan: [
-                    { module: "Module 1: Essential Fundamentals", topics: [{ name: "Programming Logic and Algorithms", link: "https://www.geeksforgeeks.org/introduction-to-algorithms/" }, { name: "Data Types and Variables", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types" }, { name: "Operators (Arithmetic, Logical, Comparison)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators" }, { name: "Conditional Statements (if, else, switch)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling" }, { name: "Looping Structures (for, while)", link: "https://www.w3schools.com/js/js_loop_for.asp" }] },
-                    { module: "Module 2: Programming Language (Base)", topics: ["Basic Syntax and Environment (Python/JavaScript)", { name: "Functions, Parameters, and Return", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" }, "Variable Scope (Global, Local)", { name: "Native Data Structures (Lists/Arrays, Dictionaries/Objects)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }, "String and Number Manipulation", { name: "Error and Exception Handling (try...catch)", link: "https://www.w3schools.com/js/js_errors.asp" }] },
-                    { module: "Module 3: Data Structures", topics: [{ name: "Arrays and Matrices", link: "https://www.geeksforgeeks.org/array-data-structure/" }, { name: "Stacks", link: "https://www.geeksforgeeks.org/stack-data-structure/" }, { name: "Queues", link: "https://www.geeksforgeeks.org/queue-data-structure/" }, { name: "Linked Lists (Singly, Doubly)", link: "https://www.geeksforgeeks.org/data-structures/linked-list/" }, { name: "Trees (Binary, Binary Search Tree - BST)", link: "https://www.geeksforgeeks.org/binary-search-tree-data-structure/" }, "Heaps (Min/Max Heap)", { name: "Hash Tables (Hashmaps)", link: "https://www.geeksforgeeks.org/hashing-data-structure/" }, "Graphs (Concepts and Representations)", "Tries (Prefix Tree)"] },
-                    { module: "Module 4: Advanced Algorithms", topics: [{ name: "Complexity Analysis (Big O Notation)", link: "https://www.geeksforgeeks.org/analysis-algorithms-big-o-analysis/" }, "Divide and Conquer Strategy", { name: "Search Algorithms (Linear, Binary)", link: "https://www.khanacademy.org/computing/computer-science/algorithms/binary-search/a/binary-search" }, { name: "Sorting Algorithms (Bubble, Selection, Insertion, Merge, Quick Sort)", link: "https://www.geeksforgeeks.org/sorting-algorithms/" }, "Advanced Recursion", "Dynamic Programming (Concepts)", "Greedy Algorithms"] },
-                    { module: "Module 5: Programming Paradigms", topics: [{ name: "Object-Oriented Programming (Classes, Inheritance, Polymorphism, Encapsulation)", link: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Details_of_the_Object_Model" }, { name: "Functional Programming (Pure Functions, Immutability, High-Order Functions)", link: "https://www.geeksforgeeks.org/functional-programming-paradigm/" }, "Procedural vs Declarative Programming", { name: "Design Patterns: Singleton, Factory, Observer", link: "https://refactoring.guru/design-patterns" }] },
-                    { module: "Module 6: Databases", topics: ["Relational Database Concepts", { name: "SQL Language (SELECT, INSERT, UPDATE, DELETE, JOINs)", link: "https://www.w3schools.com/sql/" }, "Data Modeling (Entity-Relationship)", { name: "NoSQL Database Concepts (Document, Key-Value, Columnar)", link: "https://www.mongodb.com/nosql-explained" }, "ORM (Object-Relational Mapping) - Concepts and Practice", "Transactions (ACID)"] },
-                    { module: "Module 7: Tools and Best Practices", topics: [{ name: "Version Control with Git and GitHub", link: "https://git-scm.com/book/en/v2" }, "Command Line (Terminal/Shell)", { name: "Package Managers (NPM/Yarn, Pip)", link: "https://docs.npmjs.com/about-npm" }, { name: "Software Testing (Unit, Integration, E2E)", link: "https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing" }, { name: "Design Principles (SOLID, DRY, KISS)", link: "https://www.digitalocean.com/community/conceptual_articles/s-o-l-i-d-the-first-5-principles-of-object-oriented-design" }, "Code Debugging", { name: "REST APIs (Concepts, HTTP Methods, Consumption)", link: "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" }, "CI/CD - Continuous Integration & Delivery (Concepts)"] },
-                    { module: "Module 8: Advanced Topics and Specialization", topics: ["Concurrency and Parallelism (Threads, Async/Await)", "Software Architecture (Monolith, Microservices, Serverless)", { name: "Information Security (OWASP Top 10)", link: "https://owasp.org/www-project-top-ten/" }, { name: "Cloud Computing (AWS/Azure/GCP - Concepts)", link: "https://aws.amazon.com/what-is-cloud-computing/" }, { name: "Containers (Docker - Concepts and Practice)", link: "https://www.docker.com/get-started/" }, "Message Queues (RabbitMQ/Kafka - Concepts)", "WebSockets and GraphQL", { name: "Explore Full Backend Roadmap", link: "https://roadmap.sh/backend" }] }
-                ]
+                systemMsgNoResponse: "Sorry, I couldn't generate a response."
             }
         };
 
         class StudyApp {
             constructor() {
-                this.studyProgress = [];
+                this.studyProgress = {};
                 this.apiKey = '';
                 this.currentLang = 'pt';
+                this.currentTab = 'general';
                 this.elements = {
-                    // Mapeia todos os elementos da UI aqui para fácil acesso
                     mainTitle: document.getElementById('main-title'),
                     mainSubtitle: document.getElementById('main-subtitle'),
                     langSwitcher: document.getElementById('lang-switcher'),
                     progressTitle: document.getElementById('progress-title'),
                     progressBar: document.getElementById('progressBar'),
-                    routinesTitle: document.getElementById('routines-title'),
-                    dailyRoutineTitle: document.getElementById('daily-routine-title'),
-                    dailyRoutineList: document.getElementById('daily-routine-list'),
-                    weeklyRoutineTitle: document.getElementById('weekly-routine-title'),
-                    weeklyRoutineList: document.getElementById('weekly-routine-list'),
-                    monthlyRoutineTitle: document.getElementById('monthly-routine-title'),
-                    monthlyRoutineList: document.getElementById('monthly-routine-list'),
+                    tabSelector: document.getElementById('tab-selector'),
                     modulesContainer: document.getElementById('modulesContainer'),
                     footerText: document.getElementById('footer-text'),
                     aiPanel: document.getElementById('ai-assistant'),
@@ -295,61 +337,54 @@
 
             init() {
                 this.loadData();
+                this.renderTabs();
                 this.applyTranslations();
                 this.renderModules();
                 this.addEventListeners();
                 this.initAIChat();
+                this.updateActiveTab();
             }
 
             loadData() {
                 this.currentLang = localStorage.getItem('currentLanguage') || 'pt';
+                this.currentTab = localStorage.getItem('currentTab') || 'general';
                 this.apiKey = localStorage.getItem('googleApiKey') || '';
-                const savedProgress = JSON.parse(localStorage.getItem('studyProgress'));
+                const savedProgress = JSON.parse(localStorage.getItem('studyProgress')) || {};
 
-                const structure = translations.pt.studyPlan; // Use a estrutura PT como base
-                if (savedProgress && savedProgress.length === structure.length) {
-                    this.studyProgress = savedProgress;
-                } else {
-                    this.studyProgress = structure.map(mod => ({
+                // Initialize progress for the general plan if not present
+                const generalStructure = contentData.general.pt;
+                if (!savedProgress.general || savedProgress.general.length !== generalStructure.length) {
+                    savedProgress.general = generalStructure.map(mod => ({
                         notes: "",
                         topics: mod.topics.map(() => ({ completed: false }))
                     }));
                 }
+                this.studyProgress = savedProgress;
             }
 
             saveData() {
                 localStorage.setItem('studyProgress', JSON.stringify(this.studyProgress));
                 localStorage.setItem('googleApiKey', this.apiKey);
                 localStorage.setItem('currentLanguage', this.currentLang);
+                localStorage.setItem('currentTab', this.currentTab);
             }
 
             applyTranslations() {
                 const t = translations[this.currentLang];
                 document.documentElement.lang = this.currentLang;
-                this.elements.mainTitle.textContent = t.mainTitle;
-                this.elements.mainSubtitle.textContent = t.mainSubtitle;
-                this.elements.progressTitle.textContent = t.progressTitle;
-                this.elements.routinesTitle.textContent = t.routinesTitle;
-                this.elements.dailyRoutineTitle.textContent = t.dailyRoutineTitle;
-                this.elements.weeklyRoutineTitle.textContent = t.weeklyRoutineTitle;
-                this.elements.monthlyRoutineTitle.textContent = t.monthlyRoutineTitle;
-                this.elements.dailyRoutineList.innerHTML = t.dailyRoutineList.map(item => `<li>${item}</li>`).join('');
-                this.elements.weeklyRoutineList.innerHTML = t.weeklyRoutineList.map(item => `<li>${item}</li>`).join('');
-                this.elements.monthlyRoutineList.innerHTML = t.monthlyRoutineList.map(item => `<li>${item}</li>`).join('');
-                this.elements.footerText.textContent = t.footerText;
-                this.elements.aiAssistantTitle.textContent = t.aiAssistantTitle;
+                Object.keys(this.elements).forEach(key => {
+                    if (t[key] && this.elements[key]) this.elements[key].textContent = t[key];
+                });
                 this.elements.chatInput.placeholder = t.chatPlaceholder;
-                this.elements.sendBtn.textContent = t.sendButton;
-                this.elements.modalTitle.textContent = t.modalTitle;
-                this.elements.modalDesc.textContent = t.modalDesc;
-                this.elements.modalSteps.innerHTML = t.modalSteps.map(item => `<li>${item}</li>`).join('');
                 this.elements.modalApiKeyPlaceholder.placeholder = t.modalApiKeyPlaceholder;
-                this.elements.saveApiKeyBtn.textContent = t.modalSave;
-                this.elements.cancelApiKeyBtn.textContent = t.modalCancel;
+                this.elements.modalSteps.innerHTML = t.modalSteps.map(item => `<li>${item}</li>`).join('');
+                this.renderTabs(); // Re-render tabs for translation
             }
 
             updateProgress() {
-                const allTopics = this.studyProgress.flatMap(module => module.topics);
+                const generalProgress = this.studyProgress.general;
+                if (!generalProgress) return;
+                const allTopics = generalProgress.flatMap(module => module.topics);
                 const completedTopics = allTopics.filter(topic => topic.completed).length;
                 const totalTopics = allTopics.length;
                 const percentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
@@ -357,60 +392,101 @@
                 this.elements.progressBar.style.width = `${percentage}%`;
                 this.elements.progressBar.textContent = `${percentage}%`;
             }
+            
+            renderTabs() {
+                const t = translations[this.currentLang];
+                const tabs = [
+                    { id: 'general', name: t.tabGeneral },
+                    { id: 'js', name: 'JavaScript' },
+                    { id: 'python', name: 'Python' },
+                    { id: 'csharp', name: 'C#' },
+                    { id: 'java', name: 'Java' },
+                    { id: 'rust', name: 'Rust' },
+                ];
+                this.elements.tabSelector.innerHTML = tabs.map(tab => `
+                    <button data-tab="${tab.id}" class="tab-button flex-grow text-center py-2 px-4 rounded-md font-semibold text-slate-700 -mb-px border border-transparent">
+                        ${tab.name}
+                    </button>
+                `).join('');
+                this.updateActiveTab();
+            }
 
             renderModules() {
                 const t = translations[this.currentLang];
+                const plan = contentData[this.currentTab][this.currentLang];
+                const isGeneralPlan = this.currentTab === 'general';
+                
                 this.elements.modulesContainer.innerHTML = '';
-                t.studyPlan.forEach((moduleData, moduleIndex) => {
+                plan.forEach((moduleData, moduleIndex) => {
                     const moduleEl = document.createElement('div');
                     moduleEl.className = 'bg-white p-6 rounded-xl shadow-sm border border-slate-200';
 
                     const topicsHtml = moduleData.topics.map((topic, topicIndex) => {
                         const topicName = typeof topic === 'string' ? topic : topic.name;
                         const topicLink = topic.link || null;
-                        const progress = this.studyProgress[moduleIndex].topics[topicIndex];
-
-                        let topicNameHtml = `<span class="ml-3 text-slate-700 flex-grow">${topicName}</span>`;
+                        
+                        let topicContentHtml = `<span class="ml-3 text-slate-700 flex-grow">${topicName}</span>`;
                         if (topicLink) {
-                            topicNameHtml += `<a href="${topicLink}" target="_blank" rel="noopener noreferrer" class="ml-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">${t.resourceButton}</a>`;
+                            topicContentHtml += `<a href="${topicLink}" target="_blank" rel="noopener noreferrer" class="ml-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium shrink-0">${t.resourceButton}</a>`;
                         }
-                        return `
-                            <div class="flex items-center py-2 border-b border-slate-100 last:border-b-0">
-                                <label for="topic-${moduleIndex}-${topicIndex}" class="flex items-center cursor-pointer w-full">
-                                    <input id="topic-${moduleIndex}-${topicIndex}" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 custom-checkbox" ${progress.completed ? 'checked' : ''} data-module="${moduleIndex}" data-topic="${topicIndex}">
-                                    ${topicNameHtml}
-                                </label>
-                            </div>`;
+                        
+                        if (isGeneralPlan) {
+                            const progress = this.studyProgress.general[moduleIndex].topics[topicIndex];
+                            return `
+                                <div class="flex items-center py-2 border-b border-slate-100 last:border-b-0">
+                                    <label for="topic-${moduleIndex}-${topicIndex}" class="flex items-center cursor-pointer w-full">
+                                        <input id="topic-${moduleIndex}-${topicIndex}" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 custom-checkbox" ${progress.completed ? 'checked' : ''} data-module="${moduleIndex}" data-topic="${topicIndex}">
+                                        ${topicContentHtml}
+                                    </label>
+                                </div>`;
+                        } else {
+                            return `<div class="flex items-center py-2 border-b border-slate-100 last:border-b-0">${topicContentHtml}</div>`;
+                        }
                     }).join('');
+                    
+                    let notesHtml = '';
+                    if (isGeneralPlan) {
+                         notesHtml = `
+                            <div class="mt-4 pt-4 border-t border-slate-200">
+                                <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium" data-notes-toggle="${moduleIndex}">${t.notesButton}</button>
+                                <div id="notes-container-${moduleIndex}" class="notes-container">
+                                    <textarea class="w-full h-24 p-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="${t.notesPlaceholder}" data-notes-input="${moduleIndex}">${this.studyProgress.general[moduleIndex].notes || ''}</textarea>
+                                </div>
+                            </div>`;
+                    }
 
                     moduleEl.innerHTML = `
                         <h3 class="text-2xl font-semibold mb-4 text-slate-800">${moduleData.module}</h3>
                         <div class="space-y-2">${topicsHtml}</div>
-                        <div class="mt-4 pt-4 border-t border-slate-200">
-                            <button class="text-sm text-indigo-600 hover:text-indigo-800 font-medium" data-notes-toggle="${moduleIndex}">${t.notesButton}</button>
-                            <div id="notes-container-${moduleIndex}" class="notes-container">
-                                <textarea class="w-full h-24 p-2 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="${t.notesPlaceholder}" data-notes-input="${moduleIndex}">${this.studyProgress[moduleIndex].notes || ''}</textarea>
-                            </div>
-                        </div>`;
+                        ${notesHtml}`;
                     this.elements.modulesContainer.appendChild(moduleEl);
                 });
-                this.updateProgress();
+                if(isGeneralPlan) this.updateProgress();
+            }
+            
+            updateActiveTab() {
+                this.elements.tabSelector.querySelectorAll('.tab-button').forEach(tab => {
+                    tab.classList.remove('active', 'border-slate-300', 'bg-white');
+                    if (tab.dataset.tab === this.currentTab) {
+                        tab.classList.add('active');
+                    }
+                });
             }
 
             addEventListeners() {
                 this.elements.modulesContainer.addEventListener('change', (e) => {
-                    if (e.target.matches('input[type="checkbox"]')) {
+                    if (e.target.matches('input[type="checkbox"]') && this.currentTab === 'general') {
                         const { module, topic } = e.target.dataset;
-                        this.studyProgress[module].topics[topic].completed = e.target.checked;
+                        this.studyProgress.general[module].topics[topic].completed = e.target.checked;
                         this.saveData();
                         this.updateProgress();
                     }
                 });
 
                 this.elements.modulesContainer.addEventListener('input', (e) => {
-                    if (e.target.matches('textarea[data-notes-input]')) {
+                    if (e.target.matches('textarea[data-notes-input]') && this.currentTab === 'general') {
                         const { notesInput } = e.target.dataset;
-                        this.studyProgress[notesInput].notes = e.target.value;
+                        this.studyProgress.general[notesInput].notes = e.target.value;
                         this.saveData();
                     }
                 });
@@ -427,6 +503,15 @@
                     this.saveData();
                     this.applyTranslations();
                     this.renderModules();
+                });
+                
+                this.elements.tabSelector.addEventListener('click', (e) => {
+                    if(e.target.matches('.tab-button')) {
+                        this.currentTab = e.target.dataset.tab;
+                        this.saveData();
+                        this.renderModules();
+                        this.updateActiveTab();
+                    }
                 });
 
                 this.elements.toggleAiBtn.addEventListener('click', () => this.elements.aiPanel.classList.remove('translate-x-full'));
@@ -523,6 +608,7 @@
             
             initAIChat() {
                 const t = translations[this.currentLang];
+                this.elements.chatMessages.innerHTML = ''; // Clear previous messages
                 if (!this.apiKey) {
                     this.addMessage('system', t.systemMsgWelcome);
                 } else {
