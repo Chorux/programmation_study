@@ -79,9 +79,9 @@
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-    <div class="relative min-h-screen">
+    <div class="relative min-h-screen flex flex-col">
         <!-- Main Content -->
-        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
             <header class="text-center mb-8 relative">
                 <h1 id="main-title" class="text-4xl font-bold text-slate-900"></h1>
                 <p id="main-subtitle" class="text-slate-600 mt-2"></p>
@@ -124,6 +124,11 @@
                 <!-- Os módulos serão inseridos aqui pelo JavaScript -->
             </div>
         </main>
+        
+        <!-- Footer -->
+        <footer class="w-full text-center p-6 text-slate-500 text-sm">
+            <p id="footer-text"></p>
+        </footer>
 
         <!-- AI Assistant Panel -->
         <div id="ai-assistant" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-lg transform translate-x-full z-50 flex flex-col">
@@ -186,6 +191,7 @@
                 notesButton: "Adicionar/Ver Anotações",
                 notesPlaceholder: "Suas anotações sobre este módulo...",
                 resourceButton: "Acessar Recurso",
+                footerText: "Este site foi criado para ajudar programadores novatos a alcançar seus objetivos. Não somos remunerados por isso, nosso único desejo é oferecer uma ótima experiência aos usuários.",
                 systemMsgApiKeySaved: "Chave de API salva com sucesso!",
                 systemMsgApiKeyNeeded: "Por favor, configure sua chave de API do Google AI nas configurações (⚙️) para usar o assistente.",
                 systemMsgWelcome: "Bem-vindo! Para começar, configure sua chave de API do Google AI nas configurações (⚙️) no canto superior direito.",
@@ -226,6 +232,7 @@
                 notesButton: "Add/View Notes",
                 notesPlaceholder: "Your notes on this module...",
                 resourceButton: "Access Resource",
+                footerText: "This site was created to help novice programmers achieve their goals. We are not compensated for this; our only wish is to provide a great experience for users.",
                 systemMsgApiKeySaved: "API Key saved successfully!",
                 systemMsgApiKeyNeeded: "Please set your Google AI API key in the settings (⚙️) to use the assistant.",
                 systemMsgWelcome: "Welcome! To get started, set your Google AI API key in the settings (⚙️) in the top right corner.",
@@ -265,6 +272,7 @@
                     monthlyRoutineTitle: document.getElementById('monthly-routine-title'),
                     monthlyRoutineList: document.getElementById('monthly-routine-list'),
                     modulesContainer: document.getElementById('modulesContainer'),
+                    footerText: document.getElementById('footer-text'),
                     aiPanel: document.getElementById('ai-assistant'),
                     toggleAiBtn: document.getElementById('toggle-ai'),
                     closeAiBtn: document.getElementById('close-ai'),
@@ -328,6 +336,7 @@
                 this.elements.dailyRoutineList.innerHTML = t.dailyRoutineList.map(item => `<li>${item}</li>`).join('');
                 this.elements.weeklyRoutineList.innerHTML = t.weeklyRoutineList.map(item => `<li>${item}</li>`).join('');
                 this.elements.monthlyRoutineList.innerHTML = t.monthlyRoutineList.map(item => `<li>${item}</li>`).join('');
+                this.elements.footerText.textContent = t.footerText;
                 this.elements.aiAssistantTitle.textContent = t.aiAssistantTitle;
                 this.elements.chatInput.placeholder = t.chatPlaceholder;
                 this.elements.sendBtn.textContent = t.sendButton;
